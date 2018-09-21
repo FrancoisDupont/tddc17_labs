@@ -28,22 +28,49 @@ public class CustomGraphSearch implements SearchObject {
 	 * Implements "graph search", which is the foundation of many search algorithms
 	 */
 	public ArrayList<SearchNode> search(Problem p) {
-		// The frontier is a queue of expanded SearchNodes not processed yet
-		frontier = new NodeQueue();
-		/// The explored set is a set of nodes that have been processed 
-		explored = new HashSet<SearchNode>();
+
 		// The start state is given
 		GridPos startState = (GridPos) p.getInitialState();
-		// Initialize the frontier with the start state  
-		frontier.addNodeToFront(new SearchNode(startState));
-
-		// Path will be empty until we find the goal.
+		SearchNode initialNode = new SearchNode(startState);
+		// Path to reach gold state
 		path = new ArrayList<SearchNode>();
-		
-		// Implement this!
-		System.out.println("Implement CustomGraphSearch.java!");
-		
-		
+
+		if (p.isGoalState(startState)){
+		    path.add(initialNode);
+        } else {
+            // The frontier is a queue of expanded SearchNodes not processed yet
+            frontier = new NodeQueue();
+            /// The explored set is a set of nodes that have been processed
+            explored = new HashSet<SearchNode>();
+            // Initialize the frontier with the start state
+            frontier.addNodeToFront(initialNode);
+
+            while(path.isEmpty()){
+                if (frontier.isEmpty()){
+                    /* Note: Returning an empty path signals that no path exists */
+                    return new ArrayList<SearchNode>();
+                }
+
+                SearchNode node = frontier.removeFirst();
+                GridPos nodeState = node.getState();
+                if(p.isGoalState(nodeState)){
+                    path = node.getPathFromRoot();
+                }
+                explored.add(node);
+
+                ArrayList<GridPos> childs = p.getReachableStatesFrom(nodeState);
+                for (GridPos child: childs){
+                    SearchNode childNode = new SearchNode(child, node);
+                    if (explored.contains(childNode) == false && frontier.contains(childNode) == false){
+                        if(insertFront){
+                            frontier.addNodeToFront(childNode);
+                        } else{
+                            frontier.addNodeToBack(childNode);
+                        }
+                    }
+                }
+            }
+        }
 		/* Some hints:
 		 * -Read early part of chapter 3 in the book!
 		 * -You are free to change anything how you wish as long as the program runs, but some structure is given to help you.
